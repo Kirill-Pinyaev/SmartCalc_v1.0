@@ -1,0 +1,1077 @@
+#include "calculate.h"
+
+#define eps2 0.1
+#define eps3 1e-3
+
+#test e1
+char *expression = "7 mod (-4)";
+double real_ans = 3.0;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e2
+char *expression = "1 + log(3) / 5.24";
+double real_ans = 1.091053675;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e3
+char *expression = "sqrt(1.23)";
+double real_ans = 1.109053651;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e4
+char *expression = "sin(3.14159265359)";
+double real_ans = 0;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e5
+char *expression = "cos(sqrt(4.35))";
+double real_ans = -0.492420866636;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e6
+char *expression = "12 / sqrt(0.12) * 5.245 - (-8)";
+double real_ans = 189.692129714;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e7
+char *expression = "+0 - (+9) * (123)";
+double real_ans = -1107;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e8
+char *expression = "+0 - (+9) mod (123)";
+double real_ans = -9;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test n1
+char *expression = "3 -";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n2
+char *expression = "/2";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n3
+char *expression = "so";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n4
+char *expression = "sin(4 +";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n5
+char *expression = "lmn(3)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n6
+char *expression = "3(log(3))";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n7
+char *expression = "sqrt(* 7)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n8
+char *expression = "-*tan(3)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n9
+char *expression = "9 --3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n10
+char *expression = "3 ++3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n11
+char *expression = "1_3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n12
+char *expression = "0..";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n13
+char *expression = "cos(3))";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n14
+char *expression = "ln()";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n15
+char *expression = "loglog3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n16
+char *expression = "+892+";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n17
+char *expression = "";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n18
+char *expression = "3+mod5";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n19
+char *expression = "(^9)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n20
+char *expression = "sqrt";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n21
+char *expression = "sqrt";
+Stack_t *stack = NULL;
+ck_assert_int_eq(pars(expression, &stack), 0);
+
+#test e9
+char *expression = "log(3 + sqrt(123.023)) / (9 - 3 mod 1)";
+double real_ans = 0.127662165;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e10
+char *expression = "acos(cos(1.0))";
+double real_ans = 1;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e11
+char *expression = "atan(asin(0.123))";
+double real_ans = 0.122692891014;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e12
+char *expression = "3 * 123 mod 3 - 123 * 89 + (+8)";
+double real_ans = -10939;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e13
+char *expression = "3 ^ 1.23 - (7 ^ 0.13)";
+double real_ans = 2.574574376;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e14
+char *expression = "3 * 5 ^ 7.7";
+double real_ans = 723086.557875011;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e15
+char *expression = "3 ^ 2 ^ 2";
+double real_ans = 81;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e16
+char *expression = "124 /2 / (-8) *9 + 123 * 8 ^1";
+double real_ans = 914.25;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test e17
+char *expression = "tan(sqrt(4) - 123 + 124 * (-1.000023)) - 9.9 + tan(3.14)";
+double real_ans = -9.860194048963;
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer), 0);
+ck_assert_double_eq_tol(answer, real_ans, eps);
+
+#test n22
+char *expression = "0^(-1.2)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_POW_ZERO_NEG_EXP_ERROR);
+
+#test n23
+char *expression = "123 / 2 * 9 / 0 - 123 - 0";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_ZERO_DIVISION_ERROR);
+
+#test n24
+char *expression = "sqrt(-0.000002)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_NEG_ROOT_ERROR);
+
+#test n25
+char *expression = "sqrt(2 * (-89))";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_NEG_ROOT_ERROR);
+
+#test n26
+char *expression = "tan(-3.1415926535 / 2)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_INF_TAN_ERROR);
+
+#test n27
+char *expression = "tan(101 * (-3.1415926535) / 2)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_INF_TAN_ERROR);
+
+#test n28
+char *expression = "tan(-3 * (+3.1415926535) / 2) - 100";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_INF_TAN_ERROR);
+
+#test n29
+char *expression = "log(-0.01230120)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_NON_POS_LOG_ERROR);
+
+#test n30
+char *expression = "ln(-0.0)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_NON_POS_LOG_ERROR);
+
+#test n31
+char *expression = "ln(-0.01230120)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_NON_POS_LOG_ERROR);
+
+#test n32
+char *expression = "log(0.0)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_NON_POS_LOG_ERROR);
+
+#test n36
+char *expression = "acos(-1.00001)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_ARCCOS_RANGE_ERROR);
+
+#test n33
+char *expression = "acos(123)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_ARCCOS_RANGE_ERROR);
+
+#test n34
+char *expression = "asin(1.00001)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_ARCSIN_RANGE_ERROR);
+
+#test n35
+char *expression = "asin(-123)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_ARCSIN_RANGE_ERROR);
+
+#test n37
+char *expression = "+";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n38
+char *expression = "++3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n39
+char *expression = "2+";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n40
+char *expression = "-";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n41
+char *expression = "--3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n42
+char *expression = "2-";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n43
+char *expression = "*";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n44
+char *expression = "*3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n45
+char *expression = "2*";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n46
+char *expression = "/";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n47
+char *expression = "2/";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n48
+char *expression = "/3";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n49
+char *expression = "^";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n50
+char *expression = "2^";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n51
+char *expression = "^2";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n52
+char *expression = "^-";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n53
+char *expression = "-(^)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n54
+char *expression = "2)(";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n55
+char *expression = "mod";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n56
+char *expression = "2mod";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n57
+char *expression = "mod2";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n58
+char *expression = "cos";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n59
+char *expression = "cos(";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n60
+char *expression = "sin)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n61
+char *expression = "tan3)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n62
+char *expression = "log";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n63
+char *expression = "atan     ()";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n64
+char *expression = "asin";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n65
+char *expression = "acos     ()";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n66
+char *expression = "atan";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n67
+char *expression = "acos";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n68
+char *expression = "log()";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n69
+char *expression = "3 + ln";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n70
+char *expression = "- sin";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n72
+char *expression = "4 mod (-0.0)";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_ZERO_DIVISION_ERROR);
+
+#test n71
+char *expression = "mod";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n73
+char *expression = "ln";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n74
+char *expression = "ln() - ()";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n75
+char *expression = "tan()";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+#test n76
+char *expression = "tan";
+double answer;
+ck_assert_int_eq(solve_expression(expression, 0.0, &answer),
+EXIT_EXPR_PARSING_ERROR);
+
+
+#test pkn1
+double total_loan_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.34;
+char type = 'p';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn2
+double total_loan_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.34;
+char type = '1';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn3
+double total_loan_amount = 0.0;
+int month_term = 12;
+double interest_rate = 3.34;
+char type = 'a';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn4
+double total_loan_amount = -123;
+int month_term = 12;
+double interest_rate = 3.34;
+char type = 'a';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn5
+double total_loan_amount = 1000000.0;
+int month_term = 0;
+double interest_rate = 3.34;
+char type = 'a';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn6
+double total_loan_amount = 1000000.0;
+int month_term = -123;
+double interest_rate = 3.34;
+char type = 'a';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn7
+double total_loan_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 0.0;
+char type = 'a';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pkn8
+double total_loan_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = -1.0;
+char type = 'a';
+double payment_month[10000];
+double overpayment;
+double total_payment;
+ck_assert_int_eq(calc_credit(total_loan_amount, month_term, interest_rate, type,
+payment_month, &overpayment, &total_payment), EXIT_CREDIT_INPUT_ERROR);
+
+#test pd1
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 0.0;
+int repayment_periodicity = 1;
+int interest_capitalization = 0;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double real_accrued_interest = 32754.5235;
+double real_tax_amount = 0;
+double real_amount_on_deposit = 1019515.00; 
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), 0);
+ck_assert_double_eq_tol(real_accrued_interest, accrued_interest, eps2);
+ck_assert_double_eq_tol(real_tax_amount, tax_amount, eps2);
+ck_assert_double_eq_tol(real_amount_on_deposit, amount_on_deposit, eps2);
+
+#test pd2
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 4.5;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double real_accrued_interest = 31685.2;
+double real_tax_amount = 1493.02;
+double real_amount_on_deposit = 1051200.2; 
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), 0);
+ck_assert_double_eq_tol(real_accrued_interest, accrued_interest, eps2);
+ck_assert_double_eq_tol(real_amount_on_deposit, amount_on_deposit, eps2);
+ck_assert_double_eq_tol(real_tax_amount, tax_amount, eps2);
+
+#test pdn1
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = -0.001;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn2
+double deposit_amount = 0.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn3
+double deposit_amount = -1.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn4
+double deposit_amount = 1000000.0;
+int month_term = 0;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn5
+double deposit_amount = 1000000.0;
+int month_term = -1;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn6
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 0.0;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn7
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = -5;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn8
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 0;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn18
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = -2;
+int interest_capitalization = 1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn9
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = -1;
+double replenishment[2][2] = {{20000, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn10
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{0, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn11
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {-6, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn12
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = -1;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn13
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 4}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{0, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn14
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 4}, {0, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn15
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 4}, {14000, 10}};
+int replenishment_count = -2;
+double withdraw[2][2] = {{12345, 6}, {2140, 0}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn16
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 14}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 6}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test pdn17
+double deposit_amount = 1000000.0;
+int month_term = 12;
+double interest_rate = 3.24;
+double tax_rate = 1;
+int repayment_periodicity = 2;
+int interest_capitalization = 2;
+double replenishment[2][2] = {{123, 10}, {14000, 10}};
+int replenishment_count = 2;
+double withdraw[2][2] = {{12345, 13}, {2140, 11}};
+int withdraw_count = 2;
+double amount_on_deposit;
+double accrued_interest;
+double tax_amount;
+ck_assert_int_eq(calc_deposit(deposit_amount, month_term, interest_rate, 
+tax_rate, repayment_periodicity, interest_capitalization, replenishment, 
+replenishment_count, withdraw, withdraw_count, &accrued_interest, &tax_amount,
+&amount_on_deposit), EXIT_DEPOSIT_INPUT_ERROR);
+
+#test g1
+char *expression = "sin(x)";
+double l = -10;
+double r = 10;
+double step = 2;
+int count = (int) ((r - l) / step) + 1;
+double coordinates[100][2];
+double real_coordinates[100][2] = {{-10, 0.544}, {-8, -0.989}, {-6, 0.279}, 
+{-4, 0.757}, {-2, -0.909}, {0, 0}, {2, 0.909}, {4, -0.757}, {6, -0.279},
+{8, 0.989}, {10, -0.544}};
+ck_assert_int_eq(get_graph(expression, l, r, step, coordinates), 0);
+for (int i = 0; i < count; ++i)
+{
+	ck_assert_double_eq_tol(coordinates[i][0], real_coordinates[i][0], eps3);
+	ck_assert_double_eq_tol(coordinates[i][1], real_coordinates[i][1], eps3);
+}
+
